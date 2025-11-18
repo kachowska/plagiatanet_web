@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ru" class="scroll-smooth">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PLAGIATANET | Повышение уникальности научных работ</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+            },
+          }
+        }
+      }
+    </script>
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+    <style>
+      /* Smoother fade-in-up animation */
+      @keyframes fadeInUp {
+        from {
+          opacity: 0;
+          transform: translateY(16px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+      .fade-in-up {
+        animation: fadeInUp 0.7s ease-out forwards;
+      }
+      /* Refined pulse animation for CTA */
+      @keyframes pulse {
+        0% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7);
+        }
+        70% {
+            transform: scale(1.05);
+            box-shadow: 0 0 0 12px rgba(245, 158, 11, 0);
+        }
+        100% {
+            transform: scale(1);
+            box-shadow: 0 0 0 0 rgba(245, 158, 11, 0);
+        }
+      }
+      .animate-pulse-slow {
+        animation: pulse 2s infinite cubic-bezier(0.66, 0, 0, 1);
+      }
+      
+      /* Custom styles for range slider */
+      input[type=range].slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        background: #fff;
+        cursor: pointer;
+        height: 20px;
+        width: 20px;
+        border-radius: 50%;
+        border: 5px solid #f59e0b; /* amber-500 */
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        margin-top: -8px;
+      }
+      input[type=range].slider-thumb::-moz-range-thumb {
+        height: 20px;
+        width: 20px;
+        border-radius: 50%;
+        background: #fff;
+        cursor: pointer;
+        border: 5px solid #f59e0b;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+      }
+      input[type=range].slider-thumb::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 4px;
+        cursor: pointer;
+        background: #e5e7eb; /* gray-200 */
+        border-radius: 9999px;
+      }
+      input[type=range].slider-thumb::-moz-range-track {
+        width: 100%;
+        height: 4px;
+        cursor: pointer;
+        background: #e5e7eb;
+        border-radius: 9999px;
+      }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.2.0",
+    "react/jsx-runtime": "https://esm.sh/react@18.2.0/jsx-runtime",
+    "react-dom": "https://esm.sh/react-dom@18.2.0",
+    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+    "react-router-dom": "https://esm.sh/react-router-dom@6.22.3?external=react,react-dom",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/"
+  }
+}
+</script>
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "PLAGIATANET",
+    "url": "https://plagiatanet.net/",
+    "logo": "https://plagiatanet.net/vite.svg",
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "telephone": "+7-800-555-35-35",
+      "contactType": "customer service",
+      "email": "contact@plagiatanet.net"
+    },
+    "sameAs": [
+      "https://t.me/uniquetextbot",
+      "https://t.me/plagiatanet"
+    ]
+  }
+  </script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/index.tsx"></script>
+  </body>
+</html>

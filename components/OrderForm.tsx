@@ -1,0 +1,201 @@
+
+import React, { useState } from 'react';
+
+interface OrderFormProps {
+    onPrivacyClick: () => void;
+}
+
+const API_BASE_URL = import.meta.env.VITE_ORDER_API_BASE_URL || 'https://paraphrase-uniquetext-pro-bot.onrender.com'; // Fallback to your Render URL
+
+const OrderForm: React.FC<OrderFormProps> = ({ onPrivacyClick }) => {
+    const [workFileName, setWorkFileName] = useState('');
+    const [reportFileName, setReportFileName] = useState('');
+    const [message, setMessage] = useState('');
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [status, setStatus] = useState<{ type: 'success' | 'error' | null, text: string }>({ type: null, text: '' });
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, setter: React.Dispatch<React.SetStateAction<string>>) => {
+        if (e.target.files && e.target.files.length > 0) {
+            setter(e.target.files[0].name);
+        } else {
+            setter('');
+        }
+    };
+
+    const handleMessageChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+        setMessage(e.target.value);
+    };
+
+    const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        setStatus({ type: null, text: '' });
+
+        const formData = new FormData(e.currentTarget);
+        const data = {
+            workType: formData.get('work-type'),
+            name: formData.get('name'),
+            email: formData.get('email'),
+            phone: formData.get('phone'),
+            currentUniqueness: formData.get('current-uniqueness'),
+            requiredUniqueness: formData.get('required-uniqueness'),
+            message: formData.get('message'),
+            deadline: formData.get('deadline-date'),
+            workFileName: workFileName,
+            reportFileName: reportFileName,
+            source: 'Сайт (форма заказа)'
+        };
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/api/web-order`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            });
+
+            const result = await response.json();
+
+            if (response.ok && result.ok) {
+                setStatus({ type: 'success', text: '✅ Ваша заявка успешно отправлена! Менеджер свяжется с вами в ближайшее время.' });
+                // Optional: Reset form here
+                e.currentTarget.reset();
+                setWorkFileName('');
+                setReportFileName('');
+                setMessage('');
+            } else {
+                throw new Error(result.error || 'Ошибка отправки');
+            }
+        } catch (error) {
+            console.error('Order submission error:', error);
+            setStatus({ type: 'error', text: '❌ Произошла ошибка при отправке. Пожалуйста, проверьте данные или попробуйте позже.' });
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+    
+    const workTypes = [
+        'Курсовая работа',
+        'Дипломная работа',
+        'Статья',
+        'Диссертация',
+        'Реферат',
+        'Эссе',
+        'Практикум',
+        'Другое'
+    ];
+
+    const inputClasses = "block w-full rounded-lg border-gray-300 shadow-sm focus:border-amber-500 focus:ring-2 focus:ring-amber-500/50 py-3 px-4";
+    const labelClasses = "block text-sm font-medium text-slate-700 mb-2";
+
+    return (
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+            {status.text && (
+                <div className={`p-4 rounded-md ${status.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
+                    {status.text}
+                </div>
+            )}
+            <div>
+                <label htmlFor="work-type" className={labelClasses}>Вид работы</label>
+                <select
+                    id="work-type"
+                    name="work-type"
+                    className={inputClasses}
+                >
+                    {workTypes.map(type => <option key={type} value={type}>{type}</option>)}
+                </select>
+            </div>
+
+            <div>
+                <label htmlFor="name" className={labelClasses}>Имя и фамилия</label>
+                <input type="text" name="name" id="name" className={inputClasses} placeholder="Иван Иванов" />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label htmlFor="email" className={labelClasses}>Email-адрес *</label>
+                    <input type="email" name="email" id="email" required className={inputClasses} placeholder="you@example.com" />
+                </div>
+                <div>
+                    <label htmlFor="phone" className={labelClasses}>Номер телефона *</label>
+                    <input type="tel" name="phone" id="phone" required className={inputClasses} placeholder="+7 (999) 123-45-67" />
+                </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                 <div>
+                    <label htmlFor="current-uniqueness" className={labelClasses}>Какой сейчас процент уникальности, %</label>
+                    <input type="number" name="current-uniqueness" id="current-uniqueness" className={inputClasses} placeholder="Например, 45" />
+                </div>
+                <div>
+                    <label htmlFor="required-uniqueness" className={labelClasses}>Требуемый процент уникальности, %</label>
+                    <input type="number" name="required-uniqueness" id="required-uniqueness" className={inputClasses} placeholder="Например, 85" />
+                </div>
+            </div>
+
+            <div>
+                <label className={labelClasses}>Прикрепить файл с работой в формате docx, doc *</label>
+                <div className="mt-2 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                    <label htmlFor="work-file-upload" className="cursor-pointer bg-emerald-500 text-white font-bold py-2 px-4 rounded-md shadow-sm hover:bg-emerald-600 transition-colors whitespace-nowrap">
+                        Выбрать файл
+                    </label>
+                    <input id="work-file-upload" name="work-file-upload" type="file" required className="sr-only" accept=".doc,.docx,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document" onChange={(e) => handleFileChange(e, setWorkFileName)} />
+                    <span className="text-sm text-slate-500 truncate">{workFileName || 'Файл не выбран'}</span>
+                </div>
+                 <p className="mt-2 text-xs text-slate-500">Обязательное поле. Форматы: DOC, DOCX до 50MB</p>
+            </div>
+            
+            <div>
+                <label className={labelClasses}>Прикрепить отчет (необязательно)</label>
+                <div className="mt-2 flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                    <label htmlFor="report-file-upload" className="cursor-pointer bg-slate-500 text-white font-bold py-2 px-4 rounded-md shadow-sm hover:bg-slate-600 transition-colors whitespace-nowrap">
+                        Выбрать файл
+                    </label>
+                    <input id="report-file-upload" name="report-file-upload" type="file" className="sr-only" onChange={(e) => handleFileChange(e, setReportFileName)} />
+                    <span className="text-sm text-slate-500 truncate">{reportFileName || 'Файл не выбран'}</span>
+                </div>
+                 <p className="mt-2 text-xs text-slate-500">DOC, DOCX, PDF, RTF до 50MB</p>
+            </div>
+            
+            <div>
+                <label htmlFor="message" className={labelClasses}>Сообщение</label>
+                <div className="relative mt-1">
+                    <textarea id="message" name="message" rows={4} maxLength={200} onChange={handleMessageChange} className={inputClasses} placeholder="Ваши пожелания..."></textarea>
+                    <div className="absolute bottom-2 right-3 text-xs text-slate-400">
+                        {message.length} / 200
+                    </div>
+                </div>
+            </div>
+
+            <div>
+                 <label htmlFor="deadline-date" className={labelClasses}>Дата сдачи</label>
+                <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                        <svg className="h-5 w-5 text-slate-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+                        </svg>
+                    </div>
+                     <input type="date" name="deadline-date" id="deadline-date" className={`${inputClasses} pl-11`} />
+                </div>
+            </div>
+            
+            <div className="flex justify-center pt-2">
+                <div className="g-recaptcha" data-sitekey="6Lf_5QssAAAAALHPXxsfnq0uyvtG_AooTUd6HK_U"></div>
+            </div>
+
+            <div className="pt-2">
+                <button 
+                    type="submit" 
+                    disabled={isSubmitting}
+                    className={`w-full flex justify-center py-4 px-4 border border-transparent rounded-lg shadow-lg text-lg font-bold text-white ${isSubmitting ? 'bg-amber-400 cursor-not-allowed' : 'bg-amber-500 hover:bg-amber-600'} focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-all transform hover:scale-105`}
+                >
+                    {isSubmitting ? 'ОТПРАВКА...' : 'ОТПРАВИТЬ СООБЩЕНИЕ'}
+                </button>
+            </div>
+             <p className="text-xs text-slate-500 text-center">Нажимая кнопку, вы соглашаетесь с <a href="#" onClick={(e) => { e.preventDefault(); onPrivacyClick(); }} className="underline hover:text-amber-600">политикой конфиденциальности</a>.</p>
+        </form>
+    );
+};
+
+export default OrderForm;
