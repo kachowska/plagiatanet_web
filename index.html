@@ -17,7 +17,7 @@
     <!-- Загрузка шрифтов: display=swap предотвращает блокировку рендеринга -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
-    <!-- Tailwind CDN - конфигурация должна быть до загрузки -->
+    <!-- Tailwind CDN - конфигурация и загрузка с высоким приоритетом -->
     <script>
       tailwind = {
         config: {
@@ -31,7 +31,7 @@
         }
       }
     </script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com" fetchpriority="high"></script>
     <!-- reCAPTCHA загружается асинхронно -->
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     
@@ -116,13 +116,11 @@
   <script type="importmap">
 {
   "imports": {
-    "react": "https://esm.sh/react@18.2.0",
-    "react/jsx-runtime": "https://esm.sh/react@18.2.0/jsx-runtime",
-    "react-dom": "https://esm.sh/react-dom@18.2.0",
-    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
-    "react-router-dom": "https://esm.sh/react-router-dom@6.22.3?external=react,react-dom",
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/"
+    "react": "https://esm.sh/react@19.2.0",
+    "react/jsx-runtime": "https://esm.sh/react@19.2.0/jsx-runtime",
+    "react-dom": "https://esm.sh/react-dom@19.2.0",
+    "react-dom/client": "https://esm.sh/react-dom@19.2.0/client",
+    "react-router-dom": "https://esm.sh/react-router-dom@6.22.3?external=react,react-dom"
   }
 }
 </script>
@@ -146,15 +144,13 @@
   }
   </script>
   
-  <!-- Preload критических ресурсов -->
-  <link rel="preload" href="/index.css" as="style">
-  <link rel="preload" href="/index.tsx" as="script">
-  
-  <!-- Загрузка стилей -->
-  <link rel="stylesheet" href="/index.css">
+  <!-- Resource hints для внешних доменов (dns-prefetch как фоллбэк) -->
+  <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+  <link rel="dns-prefetch" href="https://cdn.tailwindcss.com">
 </head>
   <body>
     <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
+    <!-- Главный модуль приложения с высоким приоритетом загрузки -->
+    <script type="module" src="/index.tsx" fetchpriority="high"></script>
   </body>
 </html>

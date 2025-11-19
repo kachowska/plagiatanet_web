@@ -18,6 +18,28 @@ export default defineConfig(({ mode }) => {
         alias: {
           '@': path.resolve(__dirname, '.'),
         }
-      }
+      },
+      build: {
+        // Оптимизация размера бандла и критического пути
+        cssCodeSplit: true, // Разделение CSS для уменьшения размера
+        rollupOptions: {
+          output: {
+            // Разделение vendor кода для лучшего кэширования
+            manualChunks: {
+              'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+            },
+          },
+        },
+        // Минификация для уменьшения размера
+        minify: 'terser',
+        terserOptions: {
+          compress: {
+            drop_debugger: true,
+            // Удаляем только console.log и console.debug
+            // Сохраняем console.error и console.warn для production debugging
+            pure_funcs: ['console.log', 'console.debug', 'console.info'],
+          },
+        },
+      },
     };
 });
