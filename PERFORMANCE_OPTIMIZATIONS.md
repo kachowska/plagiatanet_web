@@ -53,9 +53,10 @@
 - CSS code splitting
 
 ✅ **Минификация**:
-- Terser для уменьшения размера
-- Удаление console.log/debug/info в production
-- Сохранение console.error/warn для отладки production ошибок
+- terser для продвинутой минификации и selective console removal
+- Удаление debugger statements
+- Удаление console.log, console.debug, console.info в production
+- Сохранение console.error и console.warn для production debugging
 
 ## Ожидаемые результаты
 

@@ -1,19 +1,32 @@
 # Тестирование логирования ошибок в Production
 
-## Проблема, которая была исправлена
+## Решение
 
-**До:** `drop_console: true` удалял **ВСЕ** console методы, включая критичные:
-- ❌ `console.error()` - для ошибок
-- ❌ `console.warn()` - для предупреждений
+Используется **terser минификатор** с selective console removal:
+- Удаляется `debugger` statements
+- Удаляется `console.log()`, `console.debug()`, `console.info()`
+- **Сохраняется** `console.error()` и `console.warn()`
 
-**После:** `pure_funcs: ['console.log', 'console.debug', 'console.info']` удаляет только:
-- ✅ `console.log()` - отладочные сообщения
-- ✅ `console.debug()` - детальная отладка
-- ✅ `console.info()` - информационные сообщения
+**Удаляется в production:**
+- ❌ `console.log()` - отладочные сообщения
+- ❌ `console.debug()` - детальная отладка
+- ❌ `console.info()` - информационные сообщения
 
 **Сохраняется в production:**
 - ✅ `console.error()` - критические ошибки
 - ✅ `console.warn()` - предупреждения
+
+**Конфигурация:**
+```typescript
+// vite.config.ts
+minify: 'terser',
+terserOptions: {
+  compress: {
+    drop_debugger: true,
+    pure_funcs: ['console.log', 'console.debug', 'console.info'],
+  },
+}
+```
 
 ## Где используется console.error()
 

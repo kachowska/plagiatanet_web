@@ -30,12 +30,12 @@ export default defineConfig(({ mode }) => {
             },
           },
         },
-        // Минификация для уменьшения размера
+        // Минификация с terser для selective console removal
         minify: 'terser',
         terserOptions: {
           compress: {
             drop_debugger: true,
-            // Удаляем только console.log и console.debug
+            // Удаляем только debug console методы
             // Сохраняем console.error и console.warn для production debugging
             pure_funcs: ['console.log', 'console.debug', 'console.info'],
           },
