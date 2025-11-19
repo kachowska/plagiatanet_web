@@ -28,10 +28,11 @@ const OrderForm: React.FC<OrderFormProps> = ({ onPrivacyClick }) => {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
+        const form = e.currentTarget;
         setIsSubmitting(true);
         setStatus({ type: null, text: '' });
 
-        const formData = new FormData(e.currentTarget);
+        const formData = new FormData(form);
         
         const fullName = formData.get('name')?.toString().trim() || '';
         const nameParts = fullName.split(/\s+/);
@@ -76,7 +77,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ onPrivacyClick }) => {
             if (response.ok && result.ok) {
                 setStatus({ type: 'success', text: '✅ Ваша заявка успешно отправлена! Менеджер свяжется с вами в ближайшее время.' });
                 // Optional: Reset form here
-                e.currentTarget.reset();
+                form.reset();
                 setWorkFileName('');
                 setReportFileName('');
                 setMessage('');
