@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 
 interface OrderFormProps {
     onPrivacyClick: () => void;
@@ -13,6 +13,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ onPrivacyClick }) => {
     const [message, setMessage] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [status, setStatus] = useState<{ type: 'success' | 'error' | null, text: string }>({ type: null, text: '' });
+    const formRef = useRef<HTMLFormElement | null>(null);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, setter: React.Dispatch<React.SetStateAction<string>>) => {
         if (e.target.files && e.target.files.length > 0) {
@@ -28,7 +29,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ onPrivacyClick }) => {
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const form = e.currentTarget;
+        const form = formRef.current || e.currentTarget;
         setIsSubmitting(true);
         setStatus({ type: null, text: '' });
 
@@ -77,7 +78,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ onPrivacyClick }) => {
             if (response.ok && result.ok) {
                 setStatus({ type: 'success', text: '✅ Ваша заявка успешно отправлена! Менеджер свяжется с вами в ближайшее время.' });
                 // Optional: Reset form here
-                form.reset();
+                formRef.current?.reset();
                 setWorkFileName('');
                 setReportFileName('');
                 setMessage('');
@@ -107,7 +108,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ onPrivacyClick }) => {
     const labelClasses = "block text-sm font-medium text-slate-700 mb-2";
 
     return (
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
+        <form className="mt-8 space-y-6" onSubmit={handleSubmit} ref={formRef}>
             {status.text && (
                 <div className={`p-4 rounded-md ${status.type === 'success' ? 'bg-green-50 text-green-800' : 'bg-red-50 text-red-800'}`}>
                     {status.text}
