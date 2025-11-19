@@ -32,27 +32,43 @@ const OrderForm: React.FC<OrderFormProps> = ({ onPrivacyClick }) => {
         setStatus({ type: null, text: '' });
 
         const formData = new FormData(e.currentTarget);
-        const data = {
-            workType: formData.get('work-type'),
-            name: formData.get('name'),
-            email: formData.get('email'),
-            phone: formData.get('phone'),
-            currentUniqueness: formData.get('current-uniqueness'),
-            requiredUniqueness: formData.get('required-uniqueness'),
-            message: formData.get('message'),
-            deadline: formData.get('deadline-date'),
-            workFileName: workFileName,
-            reportFileName: reportFileName,
-            source: 'Сайт (форма заказа)'
-        };
+        
+        const fullName = formData.get('name')?.toString().trim() || '';
+        const nameParts = fullName.split(/\s+/);
+        const firstName = nameParts[0] || '';
+        const lastName = nameParts.length > 1 ? nameParts.slice(1).join(' ') : '-';
+
+        const dataToSend = new FormData();
+        dataToSend.append('workType', formData.get('work-type') as string || '');
+        dataToSend.append('name', firstName);
+        dataToSend.append('surname', lastName);
+        dataToSend.append('email', formData.get('email') as string || '');
+        dataToSend.append('phone', formData.get('phone') as string || '');
+        dataToSend.append('currentUniqueness', formData.get('current-uniqueness') as string || '');
+        dataToSend.append('requiredUniqueness', formData.get('required-uniqueness') as string || '');
+        dataToSend.append('message', formData.get('message') as string || '');
+        dataToSend.append('deadline', formData.get('deadline-date') as string || '');
+        dataToSend.append('source', 'Сайт (форма заказа)');
+        
+        // Append files
+        const workFile = formData.get('work-file-upload');
+        if (workFile instanceof File && workFile.size > 0) {
+            dataToSend.append('workFile', workFile);
+        } else if (workFileName) {
+            dataToSend.append('workFileName', workFileName);
+        }
+
+        const reportFile = formData.get('report-file-upload');
+        if (reportFile instanceof File && reportFile.size > 0) {
+            dataToSend.append('reportFile', reportFile);
+        } else if (reportFileName) {
+             dataToSend.append('reportFileName', reportFileName);
+        }
 
         try {
             const response = await fetch(`${API_BASE_URL}/api/web-order`, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(data),
+                body: dataToSend,
             });
 
             const result = await response.json();
@@ -109,7 +125,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ onPrivacyClick }) => {
 
             <div>
                 <label htmlFor="name" className={labelClasses}>Имя и фамилия</label>
-                <input type="text" name="name" id="name" className={inputClasses} placeholder="Иван Иванов" />
+                <input type="text" name="name" id="name" required className={inputClasses} placeholder="Иван Иванов" />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
