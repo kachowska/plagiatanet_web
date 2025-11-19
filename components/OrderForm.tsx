@@ -1,5 +1,6 @@
 
 import React, { useRef, useState } from 'react';
+import { useRecaptcha } from '../hooks/useRecaptcha';
 
 interface OrderFormProps {
     onPrivacyClick: () => void;
@@ -14,6 +15,9 @@ const OrderForm: React.FC<OrderFormProps> = ({ onPrivacyClick }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [status, setStatus] = useState<{ type: 'success' | 'error' | null, text: string }>({ type: null, text: '' });
     const formRef = useRef<HTMLFormElement | null>(null);
+    
+    // Динамическая загрузка reCAPTCHA только когда пользователь открывает форму
+    const { loaded: recaptchaLoaded, error: recaptchaError } = useRecaptcha();
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, setter: React.Dispatch<React.SetStateAction<string>>) => {
         if (e.target.files && e.target.files.length > 0) {
@@ -32,6 +36,26 @@ const OrderForm: React.FC<OrderFormProps> = ({ onPrivacyClick }) => {
         const form = formRef.current || e.currentTarget;
         setIsSubmitting(true);
         setStatus({ type: null, text: '' });
+        
+        // Проверяем загрузку и прохождение reCAPTCHA
+        if (!recaptchaLoaded) {
+            setStatus({ 
+                type: 'error', 
+                text: '⏳ Пожалуйста, подождите загрузки проверки безопасности' 
+            });
+            setIsSubmitting(false);
+            return;
+        }
+        
+        // Проверяем прохождение reCAPTCHA
+        if (window.grecaptcha && !window.grecaptcha.getResponse()) {
+            setStatus({ 
+                type: 'error', 
+                text: '🔒 Пожалуйста, пройдите проверку reCAPTCHA' 
+            });
+            setIsSubmitting(false);
+            return;
+        }
 
         const formData = new FormData(form);
         
@@ -77,11 +101,15 @@ const OrderForm: React.FC<OrderFormProps> = ({ onPrivacyClick }) => {
 
             if (response.ok && result.ok) {
                 setStatus({ type: 'success', text: '✅ Ваша заявка успешно отправлена! Менеджер свяжется с вами в ближайшее время.' });
-                // Optional: Reset form here
+                // Reset form
                 formRef.current?.reset();
                 setWorkFileName('');
                 setReportFileName('');
                 setMessage('');
+                // Сбрасываем reCAPTCHA для повторного использования
+                if (window.grecaptcha && window.grecaptcha.reset) {
+                    window.grecaptcha.reset();
+                }
             } else {
                 throw new Error(result.error || 'Ошибка отправки');
             }
@@ -198,8 +226,25 @@ const OrderForm: React.FC<OrderFormProps> = ({ onPrivacyClick }) => {
                 </div>
             </div>
             
-            <div className="flex justify-center pt-2">
-                <div className="g-recaptcha" data-sitekey="6Lf_5QssAAAAALHPXxsfnq0uyvtG_AooTUd6HK_U"></div>
+            {/* reCAPTCHA загружается динамически только когда открыта форма */}
+            <div className="flex justify-center pt-2 min-h-[78px] items-center">
+                {recaptchaLoaded ? (
+                    <div className="g-recaptcha" data-sitekey="6Lf_5QssAAAAALHPXxsfnq0uyvtG_AooTUd6HK_U"></div>
+                ) : recaptchaError ? (
+                    <div className="text-red-600 text-sm text-center">
+                        ⚠️ Ошибка загрузки проверки безопасности. 
+                        <br />
+                        Пожалуйста, обновите страницу.
+                    </div>
+                ) : (
+                    <div className="flex items-center text-slate-500 text-sm">
+                        <svg className="animate-spin h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Загрузка проверки безопасности...
+                    </div>
+                )}
             </div>
 
             <div className="pt-2">
