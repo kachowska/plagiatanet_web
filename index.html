@@ -5,23 +5,37 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>PLAGIATANET | Повышение уникальности научных работ</title>
+    
+    <!-- Preconnect для критических доменов -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    <link rel="preconnect" href="https://esm.sh">
+    <link rel="preconnect" href="https://aistudiocdn.com">
+    <link rel="dns-prefetch" href="https://www.google.com">
+    
+    <!-- Загрузка шрифтов: display=swap предотвращает блокировку рендеринга -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Tailwind CDN - конфигурация должна быть до загрузки -->
     <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            fontFamily: {
-              sans: ['Inter', 'sans-serif'],
-            },
+      tailwind = {
+        config: {
+          theme: {
+            extend: {
+              fontFamily: {
+                sans: ['Inter', 'sans-serif'],
+              },
+            }
           }
         }
       }
     </script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- reCAPTCHA загружается асинхронно -->
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
-    <style>
+    
+    <!-- Критические стили для первого рендеринга --><style>
       /* Smoother fade-in-up animation */
       @keyframes fadeInUp {
         from {
@@ -124,7 +138,13 @@
     ]
   }
   </script>
-<link rel="stylesheet" href="/index.css">
+  
+  <!-- Preload критических ресурсов -->
+  <link rel="preload" href="/index.css" as="style">
+  <link rel="preload" href="/index.tsx" as="script">
+  
+  <!-- Загрузка стилей -->
+  <link rel="stylesheet" href="/index.css">
 </head>
   <body>
     <div id="root"></div>
