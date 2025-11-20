@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react';
 
 declare global {
   interface Window {
-    grecaptcha: {
-      getResponse: () => string;
-      reset: () => void;
-      render: (container: string | HTMLElement, parameters: any) => number;
-      ready: (callback: () => void) => void;
+    grecaptcha?: {
+      enterprise?: {
+        getResponse: (optWidgetId?: number) => string;
+        reset: (optWidgetId?: number) => void;
+        render: (container: string | HTMLElement, parameters: any) => number;
+        ready: (callback: () => void) => void;
+      };
     };
   }
 }
@@ -17,16 +19,16 @@ export const useRecaptcha = () => {
 
   useEffect(() => {
     // Проверяем, не загружен ли уже reCAPTCHA
-    if (window.grecaptcha) {
+    if (window.grecaptcha?.enterprise) {
       setLoaded(true);
       return;
     }
 
     // Проверяем, не загружается ли уже скрипт
-    const existingScript = document.querySelector('script[src*="recaptcha"]');
+    const existingScript = document.querySelector('script[src*="recaptcha/enterprise.js"]');
     if (existingScript) {
       existingScript.addEventListener('load', () => {
-        if (window.grecaptcha) {
+        if (window.grecaptcha?.enterprise) {
           setLoaded(true);
         }
       });
@@ -38,14 +40,14 @@ export const useRecaptcha = () => {
 
     // Создаём и загружаем скрипт
     const script = document.createElement('script');
-    script.src = 'https://www.google.com/recaptcha/api.js';
+    script.src = 'https://www.google.com/recaptcha/enterprise.js?render=explicit';
     script.async = true;
     script.defer = true;
     
     script.onload = () => {
       // Даём время reCAPTCHA инициализироваться
-      if (window.grecaptcha && window.grecaptcha.ready) {
-        window.grecaptcha.ready(() => {
+      if (window.grecaptcha?.enterprise?.ready) {
+        window.grecaptcha.enterprise.ready(() => {
           setLoaded(true);
         });
       } else {
