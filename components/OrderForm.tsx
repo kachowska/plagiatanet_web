@@ -29,7 +29,16 @@ const OrderForm: React.FC<OrderFormProps> = ({ onPrivacyClick }) => {
                 enterprise.ready(() => {
                     if (recaptchaRef.current) {
                         enterprise.render(recaptchaRef.current, {
-                            sitekey: '6LfiAhMsAAAAAJZ60cGtcDDTFMVchXhPtbYQ25x8'
+                            sitekey: '6LfiAhMsAAAAAJZ60cGtcDDTFMVchXhPtbYQ25x8',
+                            callback: (token: string) => {
+                                console.log('reCAPTCHA token generated:', token);
+                            },
+                            'expired-callback': () => {
+                                console.log('reCAPTCHA token expired');
+                            },
+                            'error-callback': () => {
+                                console.error('reCAPTCHA error callback fired');
+                            }
                         });
                         setRecaptchaRendered(true);
                     }
@@ -80,11 +89,16 @@ const OrderForm: React.FC<OrderFormProps> = ({ onPrivacyClick }) => {
             return;
         }
 
-        const token = enterprise.getResponse();
-        if (!token) {
-            setStatus({ 
-                type: 'error', 
-                text: '🔒 Пожалуйста, пройдите проверку reCAPTCHA' 
+        let token = '';
+        try {
+            // Execute reCAPTCHA Enterprise to get a token
+            token = await enterprise.execute('6LfiAhMsAAAAAJZ60cGtcDDTFMVchXhPtbYQ25x8', { action: 'submit_form' });
+            console.log('reCAPTCHA Enterprise token:', token);
+        } catch (error) {
+            console.error('reCAPTCHA Enterprise execution error:', error);
+            setStatus({
+                type: 'error',
+                text: '🔒 Ошибка при прохождении проверки безопасности. Пожалуйста, попробуйте еще раз.'
             });
             setIsSubmitting(false);
             return;
@@ -141,8 +155,8 @@ const OrderForm: React.FC<OrderFormProps> = ({ onPrivacyClick }) => {
                 setReportFileName('');
                 setMessage('');
                 // Сбрасываем reCAPTCHA для повторного использования
-                if (enterprise.reset) {
-                    enterprise.reset();
+                if (window.grecaptcha?.enterprise?.reset) {
+                    window.grecaptcha.enterprise.reset();
                 }
             } else {
                 throw new Error(result.error || 'Ошибка отправки');
