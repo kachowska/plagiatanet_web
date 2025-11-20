@@ -28,7 +28,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ onPrivacyClick }) => {
                 window.grecaptcha.ready(() => {
                     if (recaptchaRef.current) {
                         window.grecaptcha.render(recaptchaRef.current, {
-                            sitekey: '6Lf_5QssAAAAALHPXxsfnq0uyvtG_AooTUd6HK_U'
+                            sitekey: '6LfiAhMsAAAAAJZ60cGtcDDTFMVchXhPtbYQ25x8'
                         });
                         setRecaptchaRendered(true);
                     }
