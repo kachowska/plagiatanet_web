@@ -133,10 +133,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ onPrivacyClick }) => {
                 setWorkFileName('');
                 setReportFileName('');
                 setMessage('');
-                // Сбрасываем reCAPTCHA для повторного использования
-                if (window.grecaptcha?.enterprise?.reset) {
-                    window.grecaptcha.enterprise.reset();
-                }
+                // Для Score-based (невидимой) reCAPTCHA сброс не требуется
             } else {
                 throw new Error(result.error || 'Ошибка отправки');
             }
