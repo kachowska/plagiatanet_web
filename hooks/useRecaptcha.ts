@@ -39,9 +39,9 @@ export const useRecaptcha = () => {
       return;
     }
 
-    // Создаём и загружаем скрипт
+    // Создаём и загружаем скрипт с site key в URL (как указано в документации Google Cloud Console)
     const script = document.createElement('script');
-    script.src = 'https://www.google.com/recaptcha/enterprise.js?render=explicit';
+    script.src = 'https://www.google.com/recaptcha/enterprise.js?render=6LfiAhMsAAAAAJZ60cGtcDDTFMVchXhPtbYQ25x8';
     script.async = true;
     script.defer = true;
     

@@ -15,39 +15,9 @@ const OrderForm: React.FC<OrderFormProps> = ({ onPrivacyClick }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [status, setStatus] = useState<{ type: 'success' | 'error' | null, text: string }>({ type: null, text: '' });
     const formRef = useRef<HTMLFormElement | null>(null);
-    const recaptchaRef = useRef<HTMLDivElement | null>(null);
-    const [recaptchaRendered, setRecaptchaRendered] = useState(false);
     
     // Динамическая загрузка reCAPTCHA только когда пользователь открывает форму
-    const { loaded: recaptchaLoaded, error: recaptchaError } = useRecaptcha();
-
-    // Рендерим reCAPTCHA после загрузки скрипта
-    useEffect(() => {
-        const enterprise = window.grecaptcha?.enterprise;
-        if (recaptchaLoaded && recaptchaRef.current && !recaptchaRendered && enterprise) {
-            try {
-                enterprise.ready(() => {
-                    if (recaptchaRef.current) {
-                        enterprise.render(recaptchaRef.current, {
-                            sitekey: '6LfiAhMsAAAAAJZ60cGtcDDTFMVchXhPtbYQ25x8',
-                            callback: (token: string) => {
-                                console.log('reCAPTCHA token generated:', token);
-                            },
-                            'expired-callback': () => {
-                                console.log('reCAPTCHA token expired');
-                            },
-                            'error-callback': () => {
-                                console.error('reCAPTCHA error callback fired');
-                            }
-                        });
-                        setRecaptchaRendered(true);
-                    }
-                });
-            } catch (error) {
-                console.error('reCAPTCHA render error:', error);
-            }
-        }
-    }, [recaptchaLoaded, recaptchaRendered]);
+    const { loaded: recaptchaLoaded } = useRecaptcha();
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, setter: React.Dispatch<React.SetStateAction<string>>) => {
         if (e.target.files && e.target.files.length > 0) {
@@ -77,7 +47,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ onPrivacyClick }) => {
             return;
         }
         
-        // Проверяем прохождение reCAPTCHA
+        // Проверяем прохождение reCAPTCHA согласно документации Google Cloud Console
         const enterprise = window.grecaptcha?.enterprise;
 
         if (!enterprise) {
@@ -91,9 +61,18 @@ const OrderForm: React.FC<OrderFormProps> = ({ onPrivacyClick }) => {
 
         let token = '';
         try {
-            // Execute reCAPTCHA Enterprise to get a token
-            token = await enterprise.execute('6LfiAhMsAAAAAJZ60cGtcDDTFMVchXhPtbYQ25x8', { action: 'submit_form' });
-            console.log('reCAPTCHA Enterprise token:', token);
+            // Используем ready() как в документации Google Cloud Console
+            await new Promise<void>((resolve, reject) => {
+                enterprise.ready(async () => {
+                    try {
+                        token = await enterprise.execute('6LfiAhMsAAAAAJZ60cGtcDDTFMVchXhPtbYQ25x8', { action: 'submit_form' });
+                        console.log('reCAPTCHA Enterprise token:', token);
+                        resolve();
+                    } catch (error) {
+                        reject(error);
+                    }
+                });
+            });
         } catch (error) {
             console.error('reCAPTCHA Enterprise execution error:', error);
             setStatus({
@@ -274,26 +253,7 @@ const OrderForm: React.FC<OrderFormProps> = ({ onPrivacyClick }) => {
                 </div>
             </div>
             
-            {/* reCAPTCHA загружается динамически только когда открыта форма */}
-            <div className="flex justify-center pt-2 min-h-[78px] items-center">
-                {recaptchaError ? (
-                    <div className="text-red-600 text-sm text-center">
-                        ⚠️ Ошибка загрузки проверки безопасности. 
-                        <br />
-                        Пожалуйста, обновите страницу.
-                    </div>
-                ) : !recaptchaLoaded ? (
-                    <div className="flex items-center text-slate-500 text-sm">
-                        <svg className="animate-spin h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                        Загрузка проверки безопасности...
-                    </div>
-                ) : (
-                    <div ref={recaptchaRef}></div>
-                )}
-            </div>
+            {/* reCAPTCHA Enterprise работает невидимо через execute() при отправке формы */}
 
             <div className="pt-2">
                 <button 
