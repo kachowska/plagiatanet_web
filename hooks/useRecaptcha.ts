@@ -26,16 +26,41 @@ export const useRecaptcha = () => {
     }
 
     // Проверяем, не загружается ли уже скрипт
-    const existingScript = document.querySelector('script[src*="recaptcha/enterprise.js"]');
+    const existingScript = document.querySelector('script[src*="recaptcha/enterprise.js"]') as HTMLScriptElement;
     if (existingScript) {
-      existingScript.addEventListener('load', () => {
+      // Check if reCAPTCHA is already available (script already loaded)
+      if (window.grecaptcha?.enterprise) {
+        setLoaded(true);
+        return;
+      }
+      
+      // Script exists but reCAPTCHA not available yet
+      // Set up a polling mechanism to check for availability
+      let attempts = 0;
+      const maxAttempts = 50; // 5 seconds with 100ms intervals
+      
+      const checkRecaptcha = () => {
+        attempts++;
         if (window.grecaptcha?.enterprise) {
           setLoaded(true);
+        } else if (attempts >= maxAttempts) {
+          // If still not loaded after 5 seconds, set up event listeners as fallback
+          existingScript.addEventListener('load', () => {
+            if (window.grecaptcha?.enterprise) {
+              setLoaded(true);
+            }
+          });
+          existingScript.addEventListener('error', () => {
+            setError(new Error('Failed to load reCAPTCHA'));
+          });
+        } else {
+          // Continue checking
+          setTimeout(checkRecaptcha, 100);
         }
-      });
-      existingScript.addEventListener('error', () => {
-        setError(new Error('Failed to load reCAPTCHA'));
-      });
+      };
+      
+      // Start checking immediately
+      checkRecaptcha();
       return;
     }
 
