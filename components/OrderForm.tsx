@@ -75,8 +75,8 @@ const OrderForm: React.FC<OrderFormProps> = ({ onPrivacyClick }) => {
             });
         } catch (error) {
             console.error('reCAPTCHA Enterprise execution error:', error);
-            setStatus({
-                type: 'error',
+            setStatus({ 
+                type: 'error', 
                 text: '🔒 Ошибка при прохождении проверки безопасности. Пожалуйста, попробуйте еще раз.'
             });
             setIsSubmitting(false);
