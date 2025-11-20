@@ -1,5 +1,5 @@
 
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import { useRecaptcha } from '../hooks/useRecaptcha';
 
 interface OrderFormProps {
@@ -15,9 +15,29 @@ const OrderForm: React.FC<OrderFormProps> = ({ onPrivacyClick }) => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [status, setStatus] = useState<{ type: 'success' | 'error' | null, text: string }>({ type: null, text: '' });
     const formRef = useRef<HTMLFormElement | null>(null);
+    const recaptchaRef = useRef<HTMLDivElement | null>(null);
+    const [recaptchaRendered, setRecaptchaRendered] = useState(false);
     
     // Динамическая загрузка reCAPTCHA только когда пользователь открывает форму
     const { loaded: recaptchaLoaded, error: recaptchaError } = useRecaptcha();
+
+    // Рендерим reCAPTCHA после загрузки скрипта
+    useEffect(() => {
+        if (recaptchaLoaded && recaptchaRef.current && !recaptchaRendered && window.grecaptcha) {
+            try {
+                window.grecaptcha.ready(() => {
+                    if (recaptchaRef.current) {
+                        window.grecaptcha.render(recaptchaRef.current, {
+                            sitekey: '6Lf_5QssAAAAALHPXxsfnq0uyvtG_AooTUd6HK_U'
+                        });
+                        setRecaptchaRendered(true);
+                    }
+                });
+            } catch (error) {
+                console.error('reCAPTCHA render error:', error);
+            }
+        }
+    }, [recaptchaLoaded, recaptchaRendered]);
 
     const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, setter: React.Dispatch<React.SetStateAction<string>>) => {
         if (e.target.files && e.target.files.length > 0) {
@@ -228,15 +248,13 @@ const OrderForm: React.FC<OrderFormProps> = ({ onPrivacyClick }) => {
             
             {/* reCAPTCHA загружается динамически только когда открыта форма */}
             <div className="flex justify-center pt-2 min-h-[78px] items-center">
-                {recaptchaLoaded ? (
-                    <div className="g-recaptcha" data-sitekey="6Lf_5QssAAAAALHPXxsfnq0uyvtG_AooTUd6HK_U"></div>
-                ) : recaptchaError ? (
+                {recaptchaError ? (
                     <div className="text-red-600 text-sm text-center">
                         ⚠️ Ошибка загрузки проверки безопасности. 
                         <br />
                         Пожалуйста, обновите страницу.
                     </div>
-                ) : (
+                ) : !recaptchaLoaded ? (
                     <div className="flex items-center text-slate-500 text-sm">
                         <svg className="animate-spin h-5 w-5 mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                             <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
@@ -244,6 +262,8 @@ const OrderForm: React.FC<OrderFormProps> = ({ onPrivacyClick }) => {
                         </svg>
                         Загрузка проверки безопасности...
                     </div>
+                ) : (
+                    <div ref={recaptchaRef}></div>
                 )}
             </div>
 
