@@ -8,6 +8,7 @@ declare global {
         reset: (optWidgetId?: number) => void;
         render: (container: string | HTMLElement, parameters: any) => number;
         ready: (callback: () => void) => void;
+        execute: (siteKey: string, params?: { action?: string }) => Promise<string>;
       };
     };
   }
