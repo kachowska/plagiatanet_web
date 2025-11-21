@@ -45,14 +45,14 @@ export const useRecaptcha = () => {
           setLoaded(true);
         } else if (attempts >= maxAttempts) {
           // If still not loaded after 5 seconds, set up event listeners as fallback
-          existingScript.addEventListener('load', () => {
-            if (window.grecaptcha?.enterprise) {
-              setLoaded(true);
-            }
-          });
-          existingScript.addEventListener('error', () => {
-            setError(new Error('Failed to load reCAPTCHA'));
-          });
+      existingScript.addEventListener('load', () => {
+        if (window.grecaptcha?.enterprise) {
+          setLoaded(true);
+        }
+      });
+      existingScript.addEventListener('error', () => {
+        setError(new Error('Failed to load reCAPTCHA'));
+      });
         } else {
           // Continue checking
           setTimeout(checkRecaptcha, 100);
