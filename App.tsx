@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { HashRouter as Router, Routes, Route } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
 
 import Header from './components/Header';
 import Home from './components/Home';
@@ -13,11 +13,12 @@ import { DiscountIcon } from './constants';
 import PrivacyPolicyContent from './components/PrivacyPolicyContent';
 import OfferAgreementContent from './components/OfferAgreementContent';
 
-const App: React.FC = () => {
+const AppContent: React.FC = () => {
   const [isDiscountModalOpen, setIsDiscountModalOpen] = useState(false);
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
   const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
   const [isOfferModalOpen, setIsOfferModalOpen] = useState(false);
+  const location = useLocation();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -27,6 +28,15 @@ const App: React.FC = () => {
 
     return () => clearTimeout(timer);
   }, []);
+
+  // Открываем модальные окна при переходе на соответствующие маршруты
+  useEffect(() => {
+    if (location.pathname === '/privacy') {
+      setIsPrivacyModalOpen(true);
+    } else if (location.pathname === '/terms') {
+      setIsOfferModalOpen(true);
+    }
+  }, [location.pathname]);
 
   const handleOrderClick = () => {
     setIsOrderModalOpen(true);
@@ -41,15 +51,16 @@ const App: React.FC = () => {
   }
 
   return (
-    <Router>
-      <div className="bg-gray-50 text-slate-700 font-sans antialiased">
-        <Header onOrderClick={handleOrderClick} />
-        <main>
-          <Routes>
-            <Route path="/" element={<Home onOrderClick={handleOrderClick} />} />
-            <Route path="/services/:slug" element={<ServicePage onOrderClick={handleOrderClick} />} />
-          </Routes>
-        </main>
+    <div className="bg-gray-50 text-slate-700 font-sans antialiased">
+      <Header onOrderClick={handleOrderClick} />
+      <main>
+        <Routes>
+          <Route path="/" element={<Home onOrderClick={handleOrderClick} />} />
+          <Route path="/services/:slug" element={<ServicePage onOrderClick={handleOrderClick} />} />
+          <Route path="/privacy" element={<Home onOrderClick={handleOrderClick} />} />
+          <Route path="/terms" element={<Home onOrderClick={handleOrderClick} />} />
+        </Routes>
+      </main>
         <Footer onPrivacyClick={handlePrivacyClick} onOfferClick={handleOfferClick} />
         <StickyElements onOrderClick={handleOrderClick} />
         
@@ -80,14 +91,31 @@ const App: React.FC = () => {
           </div>
         </Modal>
 
-        <Modal isOpen={isPrivacyModalOpen} onClose={() => setIsPrivacyModalOpen(false)}>
-          <PrivacyPolicyContent />
-        </Modal>
+      <Modal isOpen={isPrivacyModalOpen} onClose={() => {
+        setIsPrivacyModalOpen(false);
+        if (location.pathname === '/privacy') {
+          window.history.pushState({}, '', '/');
+        }
+      }}>
+        <PrivacyPolicyContent />
+      </Modal>
 
-        <Modal isOpen={isOfferModalOpen} onClose={() => setIsOfferModalOpen(false)}>
-          <OfferAgreementContent />
-        </Modal>
-      </div>
+      <Modal isOpen={isOfferModalOpen} onClose={() => {
+        setIsOfferModalOpen(false);
+        if (location.pathname === '/terms') {
+          window.history.pushState({}, '', '/');
+        }
+      }}>
+        <OfferAgreementContent />
+      </Modal>
+    </div>
+  );
+};
+
+const App: React.FC = () => {
+  return (
+    <Router>
+      <AppContent />
     </Router>
   );
 };
