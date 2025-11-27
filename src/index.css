@@ -123,3 +123,11 @@
     text-wrap: balance;
   }
 }
+
+/* Fix reCAPTCHA badge overlap with sticky buttons - move to bottom-left on all devices */
+.grecaptcha-badge { 
+    left: 4px !important;
+    right: auto !important;
+    bottom: 24px !important;
+    z-index: 30 !important; /* Ensure it doesn't cover modal but visible */
+}
