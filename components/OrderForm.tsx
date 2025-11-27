@@ -6,7 +6,10 @@ interface OrderFormProps {
     onPrivacyClick: () => void;
 }
 
-const API_BASE_URL = import.meta.env.VITE_ORDER_API_BASE_URL || 'https://paraphrase-uniquetext-pro-bot.onrender.com'; // Fallback to your Render URL
+// Use relative path (empty string) or full domain URL
+// Empty string = relative path /api/web-order (works with Nginx proxy)
+// Full URL = https://plagiatanet.by (for cross-origin if needed)
+const API_BASE_URL = import.meta.env.VITE_ORDER_API_BASE_URL || '';
 
 const OrderForm: React.FC<OrderFormProps> = ({ onPrivacyClick }) => {
     const [workFileName, setWorkFileName] = useState('');

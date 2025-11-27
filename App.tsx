@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { BrowserRouter as Router, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 
 import Header from './components/Header';
 import Home from './components/Home';
@@ -19,6 +19,7 @@ const AppContent: React.FC = () => {
   const [isPrivacyModalOpen, setIsPrivacyModalOpen] = useState(false);
   const [isOfferModalOpen, setIsOfferModalOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -30,11 +31,18 @@ const AppContent: React.FC = () => {
   }, []);
 
   // Открываем модальные окна при переходе на соответствующие маршруты
+  // и закрываем их при переходе на другие маршруты
   useEffect(() => {
     if (location.pathname === '/privacy') {
       setIsPrivacyModalOpen(true);
+      setIsOfferModalOpen(false); // Закрываем другое модальное окно, если оно было открыто
     } else if (location.pathname === '/terms') {
       setIsOfferModalOpen(true);
+      setIsPrivacyModalOpen(false); // Закрываем другое модальное окно, если оно было открыто
+    } else {
+      // Закрываем оба модальных окна при переходе на любой другой маршрут
+      setIsPrivacyModalOpen(false);
+      setIsOfferModalOpen(false);
     }
   }, [location.pathname]);
 
@@ -94,7 +102,7 @@ const AppContent: React.FC = () => {
       <Modal isOpen={isPrivacyModalOpen} onClose={() => {
         setIsPrivacyModalOpen(false);
         if (location.pathname === '/privacy') {
-          window.history.pushState({}, '', '/');
+          navigate('/', { replace: true });
         }
       }}>
         <PrivacyPolicyContent />
@@ -103,7 +111,7 @@ const AppContent: React.FC = () => {
       <Modal isOpen={isOfferModalOpen} onClose={() => {
         setIsOfferModalOpen(false);
         if (location.pathname === '/terms') {
-          window.history.pushState({}, '', '/');
+          navigate('/', { replace: true });
         }
       }}>
         <OfferAgreementContent />
